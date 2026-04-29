@@ -1,0 +1,25 @@
+# Experiment 1: baseline validation of a pretrained YOLO model on COCO.
+
+name: exp1_baseline_coco
+project: runs/experiments
+
+model: yolo11n.pt
+data: configs/data/coco2017_val_only.yaml
+
+task: detect
+split: val
+
+imgsz: 640
+batch: 8
+device: 0
+workers: 0
+
+conf: 0.001
+iou: 0.7
+max_det: 300
+half: true
+
+save_json: true
+plots: true
+verbose: true
+exist_ok: true

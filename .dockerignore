@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+.git/
+.gitignore
+.vscode/
+runs/
+generated/
+dataset/

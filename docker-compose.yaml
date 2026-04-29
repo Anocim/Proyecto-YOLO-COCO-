@@ -1,0 +1,62 @@
+services:
+  yolo_train:
+    build: .
+    image: yolo_jetson
+    container_name: yolo_train
+
+    volumes:
+      - .:/home/code
+
+    command:
+      [
+        "python3", "/home/code/main.py",
+        "--dataset-format", "${YOLO_DATASET_FORMAT:-coco_json}",
+        "--dataset-root", "${YOLO_DATASET_ROOT:-/home/code/dataset/coco}",
+        "--train-split", "${YOLO_TRAIN_SPLIT:-train2017}",
+        "--val-split", "${YOLO_VAL_SPLIT:-val2017}",
+        "--model-config", "${YOLO_MODEL_CONFIG:-models/yolo11_orin.yaml}",
+        "--train-config", "${YOLO_TRAIN_CONFIG:-configs/train/from_scratch_orin.yaml}",
+        "--augment-config", "${YOLO_AUGMENT_CONFIG:-configs/augment/coco_scratch_orin.yaml}",
+        "--name", "${YOLO_RUN_NAME:-yolo11_orin_scratch}",
+        "--project", "${YOLO_PROJECT_DIR:-runs}",
+        "--cache", "${YOLO_CACHE:-disk}",
+        "--workers", "${YOLO_WORKERS:-0}",
+        "--epochs", "${YOLO_EPOCHS:-300}",
+        "--batch", "${YOLO_BATCH:-4}",
+        "--imgsz", "${YOLO_IMGSZ:-640}",
+        "--device", "${YOLO_DEVICE:-0}",
+        "--patience", "${YOLO_PATIENCE:-50}"
+      ]
+
+    tty: true
+    stdin_open: true
+
+    runtime: nvidia
+    network_mode: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+  yolo_exp1:
+    build: .
+    image: yolo_jetson
+    container_name: yolo_exp1
+
+    volumes:
+      - .:/home/code
+
+    command:
+      [
+        "python3", "/home/code/exp1_baseline.py",
+        "--config", "${YOLO_EXP1_CONFIG:-configs/experiments/exp1_baseline_coco.yaml}",
+        "--show-config"
+      ]
+
+    tty: true
+    stdin_open: true
+
+    runtime: nvidia
+    network_mode: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all

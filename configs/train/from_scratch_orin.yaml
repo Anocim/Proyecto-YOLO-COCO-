@@ -1,0 +1,36 @@
+task: detect
+mode: train
+
+# Entrenamiento desde cero.
+pretrained: false
+resume: false
+
+# Ajustes generales.
+epochs: 300
+batch: 4
+imgsz: 640
+device: 0
+workers: 0
+cache: disk
+amp: true
+patience: 50
+save: true
+save_period: 10
+plots: true
+val: true
+verbose: true
+deterministic: true
+seed: 0
+
+# Optimizacion.
+optimizer: SGD
+lr0: 0.01
+lrf: 0.01
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 3.0
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+
+# Mantener la resolucion fija ayuda a controlar VRAM en Jetson.
+multi_scale: 0.0

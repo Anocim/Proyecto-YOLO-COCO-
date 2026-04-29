@@ -1,0 +1,4 @@
+# En Jetson instala torch/torchvision compatibles con tu JetPack antes de esto.
+ultralytics>=8.4.0
+PyYAML>=6.0
+numpy>=1.24
