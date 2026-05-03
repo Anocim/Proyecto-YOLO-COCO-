@@ -1,0 +1,21 @@
+{
+  "metrics/precision(B)": 0.6517943035637399,
+  "metrics/recall(B)": 0.5044689271290024,
+  "metrics/mAP50(B)": 0.5460318602363033,
+  "metrics/mAP50-95(B)": 0.38857239666392707,
+  "fitness": 0.38857239666392707,
+  "speed_ms": {
+    "preprocess": 0.2261426491837483,
+    "inference": 3.4219324881967625,
+    "loss": 0.0018748333503026515,
+    "postprocess": 1.4473991066217422
+  },
+  "box_map50": 0.5460318602363033,
+  "box_map50_95": 0.38857239666392707,
+  "box_precision": 0.6517943035637399,
+  "box_recall": 0.5044689271290024,
+  "save_dir": "/home/code/results/experiments/exp1_baseline_coco",
+  "experiment_name": "exp1_baseline_coco",
+  "model": "/home/code/yolo11n.pt",
+  "data": "/home/code/results/metadata/datasets/exp1_baseline_coco_data.yaml"
+}

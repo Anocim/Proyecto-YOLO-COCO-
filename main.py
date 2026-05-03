@@ -149,7 +149,7 @@ def prepare_data_config(args, base_dir):
     if not val_json.exists():
         raise FileNotFoundError(f"Validation JSON not found: {val_json}")
 
-    output_path = base_dir / "generated" / "datasets" / f"{args.name}.yaml"
+    output_path = base_dir / "results" / "metadata" / "datasets" / f"{args.name}.yaml"
     write_coco_json_data_yaml(
         output_path=output_path,
         dataset_root=dataset_root,
@@ -224,10 +224,8 @@ def main():
 
     data_config_path, dataset_root = prepare_data_config(args, base_dir)
     training_bundle = build_train_overrides(args, base_dir, data_config_path)
-
-    resolved_config_path = (
-        base_dir / "generated" / "runs" / f"{args.name}_resolved_config.yaml"
-    )
+    results_root = training_bundle["project_dir"].parent
+    resolved_config_path = results_root / "metadata" / "runs" / f"{args.name}_resolved_config.yaml"
     resolved_payload = {
         "model_config": str(training_bundle["model_config"]),
         "data_config": str(data_config_path),
@@ -235,6 +233,7 @@ def main():
         "dataset_format": args.dataset_format,
         "train_config": str(training_bundle["train_config"]),
         "augment_config": str(training_bundle["augment_config"]),
+        "results_root": str(results_root),
         "overrides": training_bundle["train_overrides"],
     }
     save_yaml_file(resolved_config_path, resolved_payload)

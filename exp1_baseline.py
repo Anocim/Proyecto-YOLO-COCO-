@@ -59,7 +59,7 @@ def maybe_resolve_model(model_value, base_dir):
     return str(model_value)
 
 
-def resolve_data_config(data_config_path, base_dir, experiment_name):
+def resolve_data_config(data_config_path, base_dir, experiment_name, output_root):
     source_path = resolve_path(data_config_path, base_dir)
     dataset_yaml = load_yaml_file(source_path)
 
@@ -69,7 +69,7 @@ def resolve_data_config(data_config_path, base_dir, experiment_name):
 
     dataset_yaml["path"] = str(resolve_path(dataset_root, base_dir))
 
-    resolved_path = base_dir / "generated" / "datasets" / f"{experiment_name}_data.yaml"
+    resolved_path = output_root / "datasets" / f"{experiment_name}_data.yaml"
     save_yaml_file(resolved_path, dataset_yaml)
     return resolved_path
 
@@ -138,15 +138,18 @@ def main():
     config_path = resolve_path(args.config, base_dir)
     config = load_yaml_file(config_path)
     experiment_name = str(config.get("name", config_path.stem))
+    results_root = resolve_path(config.get("results_root", "results"), base_dir)
+    metadata_root = results_root / "metadata"
 
     resolved_data_path = resolve_data_config(
         data_config_path=config["data"],
         base_dir=base_dir,
         experiment_name=experiment_name,
+        output_root=metadata_root,
     )
 
     resolved_model = maybe_resolve_model(config["model"], base_dir)
-    project_dir = resolve_path(config.get("project", "runs/experiments"), base_dir)
+    project_dir = resolve_path(config.get("project", str(results_root / "experiments")), base_dir)
 
     val_kwargs = {
         "data": str(resolved_data_path),
@@ -167,11 +170,12 @@ def main():
         "exist_ok": bool(config.get("exist_ok", True)),
     }
 
-    resolved_config_path = base_dir / "generated" / "experiments" / f"{experiment_name}.yaml"
+    resolved_config_path = metadata_root / "experiments" / f"{experiment_name}.yaml"
     resolved_payload = {
         "config_source": str(config_path),
         "model": resolved_model,
         "data": str(resolved_data_path),
+        "results_root": str(results_root),
         "val_kwargs": val_kwargs,
     }
     save_yaml_file(resolved_config_path, resolved_payload)
@@ -193,7 +197,7 @@ def main():
         }
     )
 
-    output_summary = base_dir / "generated" / "experiments" / experiment_name / "summary.json"
+    output_summary = project_dir / experiment_name / "summary.json"
     save_json_file(output_summary, summary)
     logger.info("Summary saved to: %s", output_summary)
 

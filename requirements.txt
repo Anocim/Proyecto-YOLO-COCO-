@@ -1,4 +1,5 @@
 # En Jetson instala torch/torchvision compatibles con tu JetPack antes de esto.
 ultralytics>=8.4.0
 PyYAML>=6.0
-numpy>=1.24
+# El torch de Jetson rompe con numpy 2.x en DataLoader/torch.from_numpy.
+numpy==1.26.1

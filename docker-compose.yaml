@@ -18,7 +18,7 @@ services:
         "--train-config", "${YOLO_TRAIN_CONFIG:-configs/train/from_scratch_orin.yaml}",
         "--augment-config", "${YOLO_AUGMENT_CONFIG:-configs/augment/coco_scratch_orin.yaml}",
         "--name", "${YOLO_RUN_NAME:-yolo11_orin_scratch}",
-        "--project", "${YOLO_PROJECT_DIR:-runs}",
+        "--project", "${YOLO_PROJECT_DIR:-results/train}",
         "--cache", "${YOLO_CACHE:-disk}",
         "--workers", "${YOLO_WORKERS:-0}",
         "--epochs", "${YOLO_EPOCHS:-300}",

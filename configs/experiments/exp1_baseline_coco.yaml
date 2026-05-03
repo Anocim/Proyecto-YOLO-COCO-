@@ -1,7 +1,8 @@
 # Experiment 1: baseline validation of a pretrained YOLO model on COCO.
 
 name: exp1_baseline_coco
-project: runs/experiments
+results_root: results
+project: results/experiments
 
 model: yolo11n.pt
 data: configs/data/coco2017_val_only.yaml

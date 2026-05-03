@@ -73,6 +73,12 @@ docker compose run --rm \
   yolo_train
 ```
 
+Los resultados quedan visibles en:
+
+- `results/experiments/` para el experimento 1
+- `results/train/` para entrenamientos
+- `results/metadata/` para configs resueltas y YAMLs generados
+
 ## Dataset
 
 No necesitas meter COCO dentro de esta carpeta. El dataset puede vivir en cualquier ruta del sistema.
