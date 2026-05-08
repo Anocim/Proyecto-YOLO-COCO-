@@ -1,0 +1,25 @@
+{
+  "save_dir": "/work/results/exp2_scratch_ppe",
+  "best_epoch": 99,
+  "last_epoch": 100,
+  "best_metrics": {
+    "precision": 0.62444,
+    "recall": 0.47013,
+    "mAP50": 0.51594,
+    "mAP50-95": 0.24601
+  },
+  "final_metrics": {
+    "precision": 0.63502,
+    "recall": 0.46967,
+    "mAP50": 0.51675,
+    "mAP50-95": 0.24525
+  },
+  "final_losses": {
+    "train_box_loss": 1.57196,
+    "train_cls_loss": 1.16435,
+    "train_dfl_loss": 1.89653,
+    "val_box_loss": 1.83245,
+    "val_cls_loss": 1.23857,
+    "val_dfl_loss": 2.07344
+  }
+}

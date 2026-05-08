@@ -13,19 +13,9 @@ env/
 runs/
 generated/
 results/*
-!results/experiments/
-results/experiments/*
-!results/experiments/exp1_baseline_coco/
-results/experiments/exp1_baseline_coco/*
-!results/experiments/exp1_baseline_coco/BoxF1_curve.png
-!results/experiments/exp1_baseline_coco/BoxP_curve.png
-!results/experiments/exp1_baseline_coco/BoxPR_curve.png
-!results/experiments/exp1_baseline_coco/BoxR_curve.png
-!results/experiments/exp1_baseline_coco/confusion_matrix.png
-!results/experiments/exp1_baseline_coco/confusion_matrix_normalized.png
-!results/experiments/exp1_baseline_coco/summary.json
-!results/experiments/exp1_baseline_coco/val_batch0_labels.jpg
-!results/experiments/exp1_baseline_coco/val_batch0_pred.jpg
+!results/*/
+results/*/*
+!results/*/summary.json
 
 # Datasets and large artifacts
 dataset/
