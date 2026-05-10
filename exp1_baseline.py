@@ -69,7 +69,7 @@ def resolve_data_config(data_config_path, base_dir, experiment_name, output_root
 
     dataset_yaml["path"] = str(resolve_path(dataset_root, base_dir))
 
-    resolved_path = output_root / "datasets" / f"{experiment_name}_data.yaml"
+    resolved_path = output_root / "dataset.yaml"
     save_yaml_file(resolved_path, dataset_yaml)
     return resolved_path
 
@@ -139,7 +139,9 @@ def main():
     config = load_yaml_file(config_path)
     experiment_name = str(config.get("name", config_path.stem))
     results_root = resolve_path(config.get("results_root", "results"), base_dir)
-    metadata_root = results_root / "metadata"
+    project_dir = resolve_path(config.get("project", str(results_root)), base_dir)
+    experiment_dir = project_dir / experiment_name
+    metadata_root = experiment_dir / "meta"
 
     resolved_data_path = resolve_data_config(
         data_config_path=config["data"],
@@ -149,7 +151,6 @@ def main():
     )
 
     resolved_model = maybe_resolve_model(config["model"], base_dir)
-    project_dir = resolve_path(config.get("project", str(results_root / "experiments")), base_dir)
 
     val_kwargs = {
         "data": str(resolved_data_path),
@@ -170,7 +171,7 @@ def main():
         "exist_ok": bool(config.get("exist_ok", True)),
     }
 
-    resolved_config_path = metadata_root / "experiments" / f"{experiment_name}.yaml"
+    resolved_config_path = metadata_root / "config.yaml"
     resolved_payload = {
         "config_source": str(config_path),
         "model": resolved_model,
@@ -197,7 +198,7 @@ def main():
         }
     )
 
-    output_summary = project_dir / experiment_name / "summary.json"
+    output_summary = experiment_dir / "summary.json"
     save_json_file(output_summary, summary)
     logger.info("Summary saved to: %s", output_summary)
 

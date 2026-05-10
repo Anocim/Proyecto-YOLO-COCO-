@@ -16,6 +16,7 @@ results/*
 !results/*/
 results/*/*
 !results/*/summary.json
+!results/*/results.png
 
 # Datasets and large artifacts
 dataset/

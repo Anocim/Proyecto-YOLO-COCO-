@@ -1,4 +1,6 @@
 import argparse
+import csv
+import json
 import logging
 import sys
 from pathlib import Path
@@ -31,6 +33,13 @@ def save_yaml_file(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         yaml.safe_dump(payload, handle, sort_keys=False, allow_unicode=True)
+
+
+def save_json_file(path, payload):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2, ensure_ascii=True)
 
 
 def resolve_path(value, base_dir):
@@ -78,7 +87,7 @@ def build_argparser():
     parser.add_argument("--train-json", default=None)
     parser.add_argument("--val-json", default=None)
 
-    parser.add_argument("--project", default="runs")
+    parser.add_argument("--project", default="results")
     parser.add_argument("--name", default="yolo11_orin_scratch")
     parser.add_argument("--device", default=None)
     parser.add_argument("--epochs", type=int, default=None)
@@ -96,20 +105,35 @@ def build_argparser():
     )
     parser.add_argument(
         "--pretrained",
-        action="store_true",
-        help="Activa pesos preentrenados. Por defecto este workspace entrena desde cero.",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Activa o desactiva pesos preentrenados. Si no se indica, se respeta el YAML.",
     )
-    parser.add_argument("--resume", action="store_true")
+    parser.add_argument(
+        "--resume",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Reanuda o no el entrenamiento. Si no se indica, se respeta el YAML.",
+    )
     parser.add_argument("--show-config", action="store_true")
     return parser
 
 
 def prepare_data_config(args, base_dir):
+    results_root = resolve_path(args.project, base_dir)
+
     if args.data_config:
         data_config = resolve_path(args.data_config, base_dir)
         if not data_config.exists():
             raise FileNotFoundError(f"Dataset config not found: {data_config}")
-        return data_config, None
+        dataset_yaml = load_yaml_file(data_config)
+        dataset_root = dataset_yaml.get("path")
+        if dataset_root is None:
+            raise ValueError(f"Dataset config {data_config} does not define a 'path' key.")
+        dataset_yaml["path"] = str(resolve_path(dataset_root, base_dir))
+        output_path = results_root / args.name / "meta" / "dataset.yaml"
+        save_yaml_file(output_path, dataset_yaml)
+        return output_path, Path(dataset_yaml["path"])
 
     if args.dataset_format != "coco_json":
         raise ValueError(
@@ -149,7 +173,7 @@ def prepare_data_config(args, base_dir):
     if not val_json.exists():
         raise FileNotFoundError(f"Validation JSON not found: {val_json}")
 
-    output_path = base_dir / "results" / "metadata" / "datasets" / f"{args.name}.yaml"
+    output_path = results_root / args.name / "meta" / "dataset.yaml"
     write_coco_json_data_yaml(
         output_path=output_path,
         dataset_root=dataset_root,
@@ -182,8 +206,10 @@ def build_train_overrides(args, base_dir, data_config_path):
     overrides["name"] = args.name
     overrides["workers"] = args.workers
     overrides["cache"] = normalize_cache_value(args.cache)
-    overrides["pretrained"] = bool(args.pretrained)
-    overrides["resume"] = bool(args.resume)
+    if args.pretrained is not None:
+        overrides["pretrained"] = bool(args.pretrained)
+    if args.resume is not None:
+        overrides["resume"] = bool(args.resume)
 
     if args.device is not None:
         overrides["device"] = args.device
@@ -209,6 +235,60 @@ def build_train_overrides(args, base_dir, data_config_path):
     }
 
 
+def maybe_write_training_summary(save_dir):
+    save_dir = Path(save_dir)
+    csv_path = save_dir / "results.csv"
+    if not csv_path.exists():
+        return None
+
+    rows = list(csv.DictReader(csv_path.open("r", encoding="utf-8")))
+    if not rows:
+        return None
+
+    numeric_rows = []
+    for row in rows:
+        parsed = {"epoch": int(float(row["epoch"]))}
+        for key, value in row.items():
+            if key == "epoch":
+                continue
+            try:
+                parsed[key] = float(value)
+            except (TypeError, ValueError):
+                continue
+        numeric_rows.append(parsed)
+
+    best_row = max(numeric_rows, key=lambda row: row.get("metrics/mAP50-95(B)", float("-inf")))
+    last_row = numeric_rows[-1]
+    summary = {
+        "save_dir": str(save_dir),
+        "best_epoch": best_row["epoch"],
+        "last_epoch": last_row["epoch"],
+        "best_metrics": {
+            "precision": best_row.get("metrics/precision(B)"),
+            "recall": best_row.get("metrics/recall(B)"),
+            "mAP50": best_row.get("metrics/mAP50(B)"),
+            "mAP50-95": best_row.get("metrics/mAP50-95(B)"),
+        },
+        "final_metrics": {
+            "precision": last_row.get("metrics/precision(B)"),
+            "recall": last_row.get("metrics/recall(B)"),
+            "mAP50": last_row.get("metrics/mAP50(B)"),
+            "mAP50-95": last_row.get("metrics/mAP50-95(B)"),
+        },
+        "final_losses": {
+            "train_box_loss": last_row.get("train/box_loss"),
+            "train_cls_loss": last_row.get("train/cls_loss"),
+            "train_dfl_loss": last_row.get("train/dfl_loss"),
+            "val_box_loss": last_row.get("val/box_loss"),
+            "val_cls_loss": last_row.get("val/cls_loss"),
+            "val_dfl_loss": last_row.get("val/dfl_loss"),
+        },
+    }
+    summary_path = save_dir / "summary.json"
+    save_json_file(summary_path, summary)
+    return summary_path
+
+
 def main():
     parser = build_argparser()
     args = parser.parse_args()
@@ -224,8 +304,8 @@ def main():
 
     data_config_path, dataset_root = prepare_data_config(args, base_dir)
     training_bundle = build_train_overrides(args, base_dir, data_config_path)
-    results_root = training_bundle["project_dir"].parent
-    resolved_config_path = results_root / "metadata" / "runs" / f"{args.name}_resolved_config.yaml"
+    results_root = training_bundle["project_dir"]
+    resolved_config_path = results_root / args.name / "meta" / "resolved_config.yaml"
     resolved_payload = {
         "model_config": str(training_bundle["model_config"]),
         "data_config": str(data_config_path),
@@ -256,6 +336,9 @@ def main():
     save_dir = getattr(getattr(model, "trainer", None), "save_dir", None)
     if save_dir is not None:
         logger.info("Training artifacts saved in: %s", save_dir)
+        summary_path = maybe_write_training_summary(save_dir)
+        if summary_path is not None:
+            logger.info("Summary saved in: %s", summary_path)
     else:
         logger.info("Training finished.")
     return results

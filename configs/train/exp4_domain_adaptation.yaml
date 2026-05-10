@@ -1,0 +1,36 @@
+task: detect
+mode: train
+
+# Experimento 4: adaptacion de dominio partiendo del mejor modelo del experimento 3.
+pretrained: true
+resume: false
+
+# Dataset pequeno y ya bastante cercano al dominio final.
+# Bajo epochs y LR para refinar sin degradar lo aprendido en PPE.
+epochs: 40
+batch: 4
+imgsz: 640
+device: 0
+workers: 0
+cache: disk
+amp: true
+patience: 15
+save: true
+exist_ok: true
+save_period: 10
+plots: true
+val: true
+verbose: true
+deterministic: true
+seed: 0
+
+optimizer: SGD
+lr0: 0.001
+lrf: 0.01
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 1.0
+warmup_momentum: 0.8
+warmup_bias_lr: 0.03
+
+multi_scale: 0.0

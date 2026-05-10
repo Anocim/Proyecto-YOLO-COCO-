@@ -2,7 +2,7 @@
 
 name: exp1_baseline_coco
 results_root: results
-project: results/experiments
+project: results
 
 model: yolo11n.pt
 data: configs/data/coco2017_val_only.yaml

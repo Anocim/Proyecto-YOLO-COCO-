@@ -1,0 +1,36 @@
+task: detect
+mode: train
+
+# Experimento 3: fine-tuning sobre Construction-PPE partiendo de YOLO11n preentrenado en COCO.
+pretrained: true
+resume: false
+
+# Desde pesos COCO no hace falta entrenar tanto como en scratch.
+epochs: 60
+batch: 4
+imgsz: 640
+device: 0
+workers: 0
+cache: disk
+amp: true
+patience: 20
+save: true
+exist_ok: true
+save_period: 10
+plots: true
+val: true
+verbose: true
+deterministic: true
+seed: 0
+
+# Mantengo SGD para que la comparacion con exp2 sea limpia, pero con LR mas baja.
+optimizer: SGD
+lr0: 0.002
+lrf: 0.01
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 1.0
+warmup_momentum: 0.8
+warmup_bias_lr: 0.05
+
+multi_scale: 0.0

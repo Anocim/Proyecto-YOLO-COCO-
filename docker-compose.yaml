@@ -18,7 +18,7 @@ services:
         "--train-config", "${YOLO_TRAIN_CONFIG:-configs/train/from_scratch_orin.yaml}",
         "--augment-config", "${YOLO_AUGMENT_CONFIG:-configs/augment/coco_scratch_orin.yaml}",
         "--name", "${YOLO_RUN_NAME:-yolo11_orin_scratch}",
-        "--project", "${YOLO_PROJECT_DIR:-results/train}",
+        "--project", "${YOLO_PROJECT_DIR:-results}",
         "--cache", "${YOLO_CACHE:-disk}",
         "--workers", "${YOLO_WORKERS:-0}",
         "--epochs", "${YOLO_EPOCHS:-300}",
@@ -49,6 +49,117 @@ services:
       [
         "python3", "/home/code/exp1_baseline.py",
         "--config", "${YOLO_EXP1_CONFIG:-configs/experiments/exp1_baseline_coco.yaml}",
+        "--show-config"
+      ]
+
+    tty: true
+    stdin_open: true
+
+    runtime: nvidia
+    network_mode: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+  yolo_exp2:
+    build: .
+    image: yolo_jetson
+    container_name: yolo_exp2
+
+    volumes:
+      - .:/home/code
+
+    command:
+      [
+        "python3", "/home/code/main.py",
+        "--dataset-format", "yolo",
+        "--data-config", "configs/data/construction_ppe.yaml",
+        "--model-config", "${YOLO_EXP2_MODEL_CONFIG:-models/yolo11_orin.yaml}",
+        "--train-config", "${YOLO_EXP2_TRAIN_CONFIG:-configs/train/exp2_from_scratch_ppe.yaml}",
+        "--augment-config", "${YOLO_EXP2_AUGMENT_CONFIG:-configs/augment/ppe_scratch_orin.yaml}",
+        "--name", "${YOLO_EXP2_RUN_NAME:-exp2_scratch_ppe}",
+        "--project", "${YOLO_EXP2_PROJECT_DIR:-results}",
+        "--cache", "${YOLO_EXP2_CACHE:-disk}",
+        "--workers", "${YOLO_EXP2_WORKERS:-0}",
+        "--epochs", "${YOLO_EXP2_EPOCHS:-100}",
+        "--batch", "${YOLO_EXP2_BATCH:-4}",
+        "--imgsz", "${YOLO_EXP2_IMGSZ:-640}",
+        "--device", "${YOLO_EXP2_DEVICE:-0}",
+        "--patience", "${YOLO_EXP2_PATIENCE:-30}",
+        "--show-config"
+      ]
+
+    tty: true
+    stdin_open: true
+
+    runtime: nvidia
+    network_mode: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+  yolo_exp3:
+    build: .
+    image: yolo_jetson
+    container_name: yolo_exp3
+
+    volumes:
+      - .:/home/code
+
+    command:
+      [
+        "python3", "/home/code/main.py",
+        "--dataset-format", "yolo",
+        "--data-config", "configs/data/construction_ppe.yaml",
+        "--model-config", "${YOLO_EXP3_MODEL_CONFIG:-yolo11n.pt}",
+        "--train-config", "${YOLO_EXP3_TRAIN_CONFIG:-configs/train/exp3_finetune_ppe.yaml}",
+        "--augment-config", "${YOLO_EXP3_AUGMENT_CONFIG:-configs/augment/ppe_finetune_orin.yaml}",
+        "--name", "${YOLO_EXP3_RUN_NAME:-exp3_finetune_ppe}",
+        "--project", "${YOLO_EXP3_PROJECT_DIR:-results}",
+        "--cache", "${YOLO_EXP3_CACHE:-disk}",
+        "--workers", "${YOLO_EXP3_WORKERS:-0}",
+        "--epochs", "${YOLO_EXP3_EPOCHS:-60}",
+        "--batch", "${YOLO_EXP3_BATCH:-4}",
+        "--imgsz", "${YOLO_EXP3_IMGSZ:-640}",
+        "--device", "${YOLO_EXP3_DEVICE:-0}",
+        "--patience", "${YOLO_EXP3_PATIENCE:-20}",
+        "--show-config"
+      ]
+
+    tty: true
+    stdin_open: true
+
+    runtime: nvidia
+    network_mode: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+  yolo_exp4:
+    build: .
+    image: yolo_jetson
+    container_name: yolo_exp4
+
+    volumes:
+      - .:/home/code
+
+    command:
+      [
+        "python3", "/home/code/main.py",
+        "--dataset-format", "yolo",
+        "--data-config", "configs/data/exp4_domain_adaptation.yaml",
+        "--model-config", "${YOLO_EXP4_MODEL_CONFIG:-results/exp3_finetune_ppe/weights/best.pt}",
+        "--train-config", "${YOLO_EXP4_TRAIN_CONFIG:-configs/train/exp4_domain_adaptation.yaml}",
+        "--augment-config", "${YOLO_EXP4_AUGMENT_CONFIG:-configs/augment/exp4_domain_adaptation.yaml}",
+        "--name", "${YOLO_EXP4_RUN_NAME:-exp4_domain_adaptation}",
+        "--project", "${YOLO_EXP4_PROJECT_DIR:-results}",
+        "--cache", "${YOLO_EXP4_CACHE:-disk}",
+        "--workers", "${YOLO_EXP4_WORKERS:-0}",
+        "--epochs", "${YOLO_EXP4_EPOCHS:-40}",
+        "--batch", "${YOLO_EXP4_BATCH:-4}",
+        "--imgsz", "${YOLO_EXP4_IMGSZ:-640}",
+        "--device", "${YOLO_EXP4_DEVICE:-0}",
+        "--patience", "${YOLO_EXP4_PATIENCE:-15}",
         "--show-config"
       ]
 

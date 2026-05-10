@@ -1,0 +1,21 @@
+# Dataset para el experimento 4.
+# Mezcla de los dos datasets propios anotados y repartidos en train/val/test
+# para hacer adaptacion de dominio desde el mejor checkpoint del experimento 3.
+
+path: dataset/exp4_domain_adaptation
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: helmet
+  1: gloves
+  2: vest
+  3: boots
+  4: goggles
+  5: none
+  6: Person
+  7: no_helmet
+  8: no_goggle
+  9: no_gloves
+  10: no_boots

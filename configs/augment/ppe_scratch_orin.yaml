@@ -1,0 +1,20 @@
+# Augmentations para entrenamiento desde cero sobre Construction-PPE.
+# Mantengo una receta moderada para no castigar demasiado un dataset pequeno.
+
+hsv_h: 0.015
+hsv_s: 0.6
+hsv_v: 0.4
+
+degrees: 5.0
+translate: 0.1
+scale: 0.4
+shear: 0.0
+perspective: 0.0
+
+flipud: 0.0
+fliplr: 0.5
+
+mosaic: 1.0
+mixup: 0.05
+copy_paste: 0.0
+close_mosaic: 10

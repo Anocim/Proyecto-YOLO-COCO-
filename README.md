@@ -15,12 +15,15 @@ YOLO/
 ├── configs/
 │   ├── augment/
 │   │   └── coco_scratch_orin.yaml
+│   │   └── ppe_scratch_orin.yaml
 │   ├── data/
 │   │   └── coco2017_val_only.yaml
+│   │   └── construction_ppe.yaml
 │   ├── experiments/
 │   │   └── exp1_baseline_coco.yaml
 │   └── train/
 │       └── from_scratch_orin.yaml
+│       └── exp2_from_scratch_ppe.yaml
 ├── exp1_baseline.py
 ├── main.py
 ├── models/
@@ -50,6 +53,9 @@ Servicios disponibles:
 
 - `yolo_train`: entrenamiento desde `main.py`
 - `yolo_exp1`: baseline preentrenado sobre COCO con `exp1_baseline.py`
+- `yolo_exp2`: experimento 2, entrenamiento desde cero sobre Construction-PPE
+- `yolo_exp3`: experimento 3, fine-tuning sobre Construction-PPE desde `yolo11n.pt`
+- `yolo_exp4`: experimento 4, adaptacion de dominio desde el `best.pt` de `exp3`
 
 Build:
 
@@ -61,6 +67,24 @@ Experimento 1:
 
 ```bash
 docker compose run --rm yolo_exp1
+```
+
+Experimento 2:
+
+```bash
+docker compose run --rm yolo_exp2
+```
+
+Experimento 3:
+
+```bash
+docker compose run --rm yolo_exp3
+```
+
+Experimento 4:
+
+```bash
+docker compose run --rm yolo_exp4
 ```
 
 Entrenamiento desde cero:
@@ -75,9 +99,82 @@ docker compose run --rm \
 
 Los resultados quedan visibles en:
 
-- `results/experiments/` para el experimento 1
-- `results/train/` para entrenamientos
-- `results/metadata/` para configs resueltas y YAMLs generados
+- `results/exp1_baseline_coco/` para el experimento 1
+- `results/exp2_scratch_ppe/` para el experimento 2
+- `results/exp3_finetune_ppe/` para el experimento 3
+- `results/exp4_domain_adaptation/` para el experimento 4
+
+## Experimento 2: entrenamiento desde cero en Construction-PPE
+
+Este experimento usa:
+
+- [configs/data/construction_ppe.yaml](/home/gmv/traaoi/YOLO/configs/data/construction_ppe.yaml)
+- [configs/train/exp2_from_scratch_ppe.yaml](/home/gmv/traaoi/YOLO/configs/train/exp2_from_scratch_ppe.yaml)
+- [configs/augment/ppe_scratch_orin.yaml](/home/gmv/traaoi/YOLO/configs/augment/ppe_scratch_orin.yaml)
+
+y entrena `YOLO11n` desde cero con `pretrained=False`.
+
+Comando:
+
+```bash
+cd /home/gmv/traaoi/YOLO
+docker compose run --rm yolo_exp2
+```
+
+Si el dataset no existe en `dataset/`, Ultralytics intentara descargarlo usando la URL oficial del dataset.
+
+## Experimento 3: fine-tuning sobre Construction-PPE desde COCO
+
+Este experimento usa:
+
+- [configs/data/construction_ppe.yaml](/home/gmv/traaoi/YOLO/configs/data/construction_ppe.yaml)
+- [configs/train/exp3_finetune_ppe.yaml](/home/gmv/traaoi/YOLO/configs/train/exp3_finetune_ppe.yaml)
+- [configs/augment/ppe_finetune_orin.yaml](/home/gmv/traaoi/YOLO/configs/augment/ppe_finetune_orin.yaml)
+
+y carga pesos preentrenados desde [yolo11n.pt](/home/gmv/traaoi/YOLO/yolo11n.pt).
+
+Comando:
+
+```bash
+cd /home/gmv/traaoi/YOLO
+docker compose run --rm yolo_exp3
+```
+
+Cambios respecto al experimento 2:
+
+- mismo dataset y misma resolucion para que la comparacion sea limpia
+- menos epochs (`60`) porque el modelo ya parte de COCO
+- `lr0` mas baja (`0.002`) para refinar en vez de reaprender
+- augmentation algo menos agresivo
+
+## Experimento 4: adaptacion de dominio con dataset propio
+
+Este experimento usa:
+
+- [configs/data/exp4_domain_adaptation.yaml](/home/gmv/traaoi/YOLO/configs/data/exp4_domain_adaptation.yaml)
+- [configs/train/exp4_domain_adaptation.yaml](/home/gmv/traaoi/YOLO/configs/train/exp4_domain_adaptation.yaml)
+- [configs/augment/exp4_domain_adaptation.yaml](/home/gmv/traaoi/YOLO/configs/augment/exp4_domain_adaptation.yaml)
+
+y parte de [best.pt](/home/gmv/traaoi/YOLO/results/exp3_finetune_ppe/weights/best.pt), que fue el mejor modelo del experimento 3.
+
+Comando:
+
+```bash
+cd /home/gmv/traaoi/YOLO
+docker compose run --rm yolo_exp4
+```
+
+El dataset final de `exp4` queda en:
+
+- [dataset/exp4_domain_adaptation](/home/gmv/traaoi/YOLO/dataset/exp4_domain_adaptation)
+
+y su reparto actual es:
+
+- `149` imagenes en `train`
+- `25` imagenes en `val`
+- `25` imagenes en `test`
+
+La idea aqui ya no es reaprender PPE desde cero, sino ajustar el detector al dominio real con un LR mas bajo y augmentations mas suaves.
 
 ## Dataset
 
@@ -112,7 +209,7 @@ python3 main.py --dataset-root /ruta/al/coco
 
 Ese comando:
 
-- genera automaticamente un `dataset.yaml` temporal en `generated/datasets/`
+- genera automaticamente un `dataset.yaml` temporal dentro de `results/<nombre_del_run>/meta/`
 - lee las clases directamente desde el JSON de COCO
 - crea el modelo desde `models/yolo11_orin.yaml`
 - entrena con `pretrained=False`

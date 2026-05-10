@@ -1,0 +1,20 @@
+# Augmentations suaves para adaptacion de dominio.
+# Interesa conservar el aspecto real de las imagenes propias.
+
+hsv_h: 0.008
+hsv_s: 0.30
+hsv_v: 0.20
+
+degrees: 2.0
+translate: 0.05
+scale: 0.15
+shear: 0.0
+perspective: 0.0
+
+flipud: 0.0
+fliplr: 0.5
+
+mosaic: 0.20
+mixup: 0.0
+copy_paste: 0.0
+close_mosaic: 3

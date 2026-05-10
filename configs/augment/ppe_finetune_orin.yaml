@@ -1,0 +1,20 @@
+# Augmentations para fine-tuning sobre Construction-PPE.
+# Bajo un poco la agresividad frente a scratch para no destruir representaciones utiles de COCO.
+
+hsv_h: 0.010
+hsv_s: 0.45
+hsv_v: 0.30
+
+degrees: 3.0
+translate: 0.08
+scale: 0.25
+shear: 0.0
+perspective: 0.0
+
+flipud: 0.0
+fliplr: 0.5
+
+mosaic: 0.5
+mixup: 0.0
+copy_paste: 0.0
+close_mosaic: 5
